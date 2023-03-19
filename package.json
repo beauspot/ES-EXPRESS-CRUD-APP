@@ -3,9 +3,10 @@
   "version": "1.0.0",
   "description": "An Express CRUD API written in es6 module syntax andmongodb alongside mongoose ORM.",
   "main": "server.js",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node server.js",
+    "dev": "nodmon server.js"
   },
   "repository": {
     "type": "git",
