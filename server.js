@@ -8,6 +8,7 @@ import xss from "xss-clean";
 import sessions from "express-session";
 import mongoSanitize from "express-mongo-sanitize";
 import { StatusCodes } from "http-status-codes";
+import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
 
 // module dependencies
@@ -27,6 +28,7 @@ app.use(cors());
 app.use(helmet());
 app.use(express.json());
 app.use(mongoSanitize());
+app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 if (process.env.NODE_ENV !== "production") {
   app.use(morgan("dev"));
