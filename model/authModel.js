@@ -48,4 +48,40 @@ userSchema.methods.generateAuthToken = async () => {
   const token = jwt.sign({ _id: user._id.toString() }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXP,
   });
+  user.tokens = user.tokens.concat({ token });
+  await user.save();
+  return token;
 };
+
+userSchema.methods.generateRefreshToken = async () => {
+  const user = this;
+  const refreshToken = jwt.sign(
+    { _id: user._id.toString() },
+    process.env.REFRESH_TOKEN,
+    { expiresIN: process.env.REF_EXP }
+  );
+};
+
+userSchema.statics.findByCredential = async (username, password) => {
+    const user = await AuthModel.findOne({ username });
+    if (!user) {
+        throw new Error("Invalid Username or Password");
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+        throw new Error("Invalid Username or Password");
+    }
+    return user;
+};
+
+userSchema.pre('save', async (next) => {
+    const user = this;
+    if (user.isModified('password')) {
+        user.password = await bcrypt.hash(user.password, 10);
+    }
+    next();
+});
+
+const authModel = userSchema.model("AuthModel", userSchema);
+export default authModel;
