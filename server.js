@@ -13,6 +13,8 @@ import dotenv from "dotenv";
 
 // module dependencies
 import connectDB from "./db/dbconfig.js";
+import taskRoute from "./routes/taskRoutes.js";
+import authRoute from "./routes/authRoute.js";
 
 // middlewares
 import __404_err_page from "./middlewares/notfound.js";
@@ -43,8 +45,14 @@ app.use(
   })
 );
 
+// routes middlewares
+app.use("/api/v1/tasks", taskRoute);
+app.use("/api/v1/auth", authRoute);
+
 app.get("/", (req, res, next) => {
-  res.status(StatusCodes.OK).send("Hello World");
+  res
+    .status(StatusCodes.PERMANENT_REDIRECT)
+    .redirect("/api/v1/auth/createacct");
 });
 
 app.use(errorHandlerMiddleware);
