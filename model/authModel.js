@@ -3,6 +3,8 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 
+dotenv.config();
+
 const userSchema = new mongoose.Schema(
   {
     email: {
@@ -43,6 +45,7 @@ const userSchema = new mongoose.Schema(
   }
 );
 
+//  generates a new JWT token for the user and saves it to the user's tokens array
 userSchema.methods.generateAuthToken = async () => {
   const user = this;
   const token = jwt.sign({ _id: user._id.toString() }, process.env.JWT_SECRET, {
@@ -53,35 +56,39 @@ userSchema.methods.generateAuthToken = async () => {
   return token;
 };
 
+// generates a new JWT token for refreshing the authentication token.
 userSchema.methods.generateRefreshToken = async () => {
   const user = this;
   const refreshToken = jwt.sign(
     { _id: user._id.toString() },
     process.env.REFRESH_TOKEN,
-    { expiresIN: process.env.REF_EXP }
+    { expiresIn: process.env.REF_EXP }
   );
 };
 
+// Takes a username and password as an arg & attempts to find a user in the db with the username.
 userSchema.statics.findByCredential = async (username, password) => {
-    const user = await AuthModel.findOne({ username });
-    if (!user) {
-        throw new Error("Invalid Username or Password");
-    }
+  const user = await authModel.findOne({ username });
+  if (!user) {
+    throw new Error("Invalid Username or Password");
+  }
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-        throw new Error("Invalid Username or Password");
-    }
-    return user;
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) {
+    throw new Error("Invalid Username or Password");
+  }
+  return user;
 };
 
-userSchema.pre('save', async (next) => {
-    const user = this;
-    if (user.isModified('password')) {
-        user.password = await bcrypt.hash(user.password, 10);
-    }
-    next();
+//  takes a username and password as arguments
+//  and attempts to find a user in the database with that username
+userSchema.pre("save", async (next) => {
+  const user = this;
+  if (user.isModified("password")) {
+    user.password = await bcrypt.hash(user.password, 10);
+  }
+  next();
 });
 
-const authModel = userSchema.model("AuthModel", userSchema);
+const authModel = mongoose.model("AuthModel", userSchema);
 export default authModel;
