@@ -2,7 +2,6 @@ import taskModel from "../model/taskModel.js";
 import { StatusCodes } from "http-status-codes";
 import asyncHandler from "express-async-handler";
 
-
 const getAllTasks = asyncHandler(async (req, res, next) => {
   const getAllTasks = await taskModel.find();
   if (getAllTasks.length === 0) {

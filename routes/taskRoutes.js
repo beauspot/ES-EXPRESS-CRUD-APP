@@ -6,11 +6,12 @@ import {
   deleteTask,
 } from "../controllers/taskCtrls.js";
 import express from "express";
+import { validateTask } from "../middlewares/validate.js";
 const router = express.Router();
 
 router.get("/getalltasks", getAllTasks);
 
-router.post("/createtask", createTask);
+router.post("/createtask", validateTask, createTask);
 
 router.get("/singletask/:id", getASingleTask);
 
