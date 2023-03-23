@@ -1,20 +1,54 @@
 import taskModel from "../model/taskModel.js";
 import { StatusCodes } from "http-status-codes";
 import asyncHandler from "express-async-handler";
+// import paginate from "express-paginate";
 
 const getAllTasks = asyncHandler(async (req, res, next) => {
-  const getAllTasks = await taskModel.find();
-  if (getAllTasks.length === 0) {
+  // pagination begins here
+  let page = parseInt(req.query.page) || 1;
+  let pageSize = parseInt(req.query.pageSize) || 2;
+
+  // calculate the number of documents to skip
+  const skipPages = (page - 1) * pageSize;
+
+  const getAlltasks = await taskModel.find().skip(skipPages).limit(pageSize);
+
+  // calculate the total number of documents
+  const count = await taskModel.countDocuments();
+
+  const totalPages = Math.ceil(count / pageSize);
+
+  if (getAlltasks.length === 0) {
     res
       .status(StatusCodes.BAD_REQUEST)
       .json({ ErrorMessage: "No tasks Available." });
-  } else {
-    return res.status(StatusCodes.OK).json({
-      length: getAllTasks.length,
-      status: StatusCodes.OK,
-      taskData: getAllTasks,
-    });
   }
+  const baseUrl = `${req.protocol}://${req.hostname}:${
+    process.env.PORT || 3000
+  }${req.baseUrl}`;
+
+  let links = {};
+  if (page > 1) {
+    links.first = `${baseUrl}?page=1`;
+    links.prev = `${baseUrl}?page=${page - 1}`;
+  }
+  if (page < totalPages) {
+    links.next = `${baseUrl}?page=${page + 1}`;
+    links.last = `${baseUrl}?page=${totalPages}`;
+  }
+  return res.status(StatusCodes.OK).json({
+    length: getAlltasks.length,
+    status: StatusCodes.OK,
+    taskData: getAlltasks,
+    // pagination ends here
+    pagination: {
+      page,
+      pageSize,
+      totalPages,
+      totalItems: count,
+      links,
+    },
+  });
 });
 
 const createTask = asyncHandler(async (req, res, next) => {
