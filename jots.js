@@ -61,8 +61,8 @@ app.get("/mydata", (req, res) => {
 
 // start the server
 app.listen(3000, () => {
-  console.log("Server started on port 3000"); */
-});
+  console.log("Server started on port 3000"); 
+});*/
 
 /**In this example, we create an Express.js app and connect it to a MongoDB database using Mongoose. We define a schema and model for the data we want to paginate. We then define a route for retrieving paginated results. The route accepts two query parameters: page and pageSize, which specify the current page number and the number of items to display per page, respectively.
 
