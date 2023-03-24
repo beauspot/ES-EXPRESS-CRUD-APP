@@ -40,12 +40,13 @@ const loginUser = async (req, res, next) => {
     expiresIn: process.env.JWT_EXP,
   });
 
-  res.cookie("refreshToken", process.env.REFRESH_TOKEN, {
-    httpOnly: true,
-    path: "/api/v1/auth/loginacct",
-    expiresIn: process.env.REFRESH_TOKEN_EXP,
-  });
-  res.json({ JWT_TOKEN: token });
+  res
+    .cookie("refreshToken", process.env.REFRESH_TOKEN, {
+      httpOnly: true,
+      path: "/api/v1/auth/loginacct",
+      expiresIn: 7 * 24 * 60 * 60 * 1000, // Set the expiration time to one week
+    })
+    .json({ JWT_TOKEN: token });
 };
 
 const logoutUser = async (req, res, next) => {

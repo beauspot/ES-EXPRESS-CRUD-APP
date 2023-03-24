@@ -5,6 +5,12 @@ const nigeriaOffset = 60 * 60 * 1000 * 1;
 // defining the schema
 const TaskSchema = new mongoose.Schema(
   {
+    // creating an association between the auth Model and the task Model
+    user_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: "AuthModel",
+    },
     taskname: {
       type: String,
       required: [true, "Please provide a task name"],
@@ -24,5 +30,5 @@ const TaskSchema = new mongoose.Schema(
   }
 );
 
-const taskModel = mongoose.model('TaskModel', TaskSchema);
+const taskModel = mongoose.model("TaskModel", TaskSchema);
 export default taskModel;
