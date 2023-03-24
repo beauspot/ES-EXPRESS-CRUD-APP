@@ -14,7 +14,7 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       trim: true,
       maxlength: 100,
-      minlength: 25,
+      minlength: 18,
     },
     username: {
       type: String,
@@ -23,13 +23,13 @@ const userSchema = new mongoose.Schema(
       trim: true,
       lowercase: true,
       maxlength: 17,
-      minlength: 10,
+      minlength: 8,
     },
     password: {
       type: String,
       required: [true, "The password is required"],
       minlength: 20,
-      maxlength: 30,
+      maxlength: 500,
     },
     tokens: [
       {
@@ -67,7 +67,7 @@ userSchema.methods.generateRefreshToken = async () => {
 };
 
 // Takes a username and password as an arg & attempts to find a user in the db with the username.
-userSchema.statics.findByCredential = async (username, password) => {
+userSchema.statics.findByCredentials = async (username, password) => {
   const user = await authModel.findOne({ username });
   if (!user) {
     throw new Error("Invalid Username or Password");
@@ -84,8 +84,8 @@ userSchema.statics.findByCredential = async (username, password) => {
 //  and attempts to find a user in the database with that username
 userSchema.pre("save", async (next) => {
   const user = this;
-  if (user.isModified("password")) {
-    user.password = await bcrypt.hash(user.password, 10);
+  if (user instanceof mongoose.Document && user.isModified("password")) {
+    user.password = await bcrypt.hash(user.password, 8);
   }
   next();
 });
