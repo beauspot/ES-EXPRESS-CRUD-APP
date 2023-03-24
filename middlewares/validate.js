@@ -8,6 +8,7 @@ export const validateTask = [
     .isLength({ min: 10, max: 50 })
     .withMessage("Task name must be between 10 and 50 characters long"),
   check("completed")
+    .optional()
     .isBoolean()
     .withMessage("Completed field must be a boolean"),
   (req, res, next) => {
