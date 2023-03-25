@@ -6,9 +6,7 @@ import dotenv from "dotenv";
 import sgMail from "@sendgrid/mail";
 
 dotenv.config();
-sgMail.setApiKey(
-  "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"
-);
+
 
 const createUser = async (req, res, next) => {
   const { email, password, username } = req.body;
