@@ -4,10 +4,11 @@ import {
   logoutUser,
   logoffUser,
 } from "../controllers/authCtrls.js";
+import { validateRegistration } from "../middlewares/validate.js";
 import express from "express";
 const router = express.Router();
 
-router.post("/createacct", createUser);
+router.post("/createacct", validateRegistration, createUser);
 
 router.post("/loginacct", loginUser);
 

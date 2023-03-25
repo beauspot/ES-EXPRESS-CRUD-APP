@@ -3,6 +3,12 @@ import { StatusCodes } from "http-status-codes";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
+import sgMail from "@sendgrid/mail";
+
+dotenv.config();
+sgMail.setApiKey(
+  "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"
+);
 
 const createUser = async (req, res, next) => {
   const { email, password, username } = req.body;
@@ -14,6 +20,15 @@ const createUser = async (req, res, next) => {
   const newUser = new authModel({ email, username, password: hashedPassword });
   console.log(newUser);
   await newUser.save();
+
+  // send a welcome email to the user
+  const msg = {
+    to: req.body.email,
+    from: "beauspot@outlook.com",
+    subject: "Welcome to the Task Manager Api community!",
+    text: "Thank you for signing up for our service. As a new member of the Octave community, we invite you to become a full-fledged Task manager community and enjoy all the benefits of our service.",
+  };
+  await sgMail.send(msg);
   res.status(StatusCodes.CREATED).json({
     message: `The User with the username ${username}, and email ${email} has been registered Successfully`,
   });

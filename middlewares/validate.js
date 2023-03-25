@@ -22,6 +22,31 @@ export const validateTask = [
   },
 ];
 
+export const validateRegistration = [
+  check("email")
+    .trim()
+    .isEmail()
+    .isLength({ max: 100 })
+    .withMessage("Provide an email address that could be 100 characters long"),
+  check("username")
+    .trim()
+    .isAlphanumeric()
+    .isLength({ min: 8, max: 17 })
+    .withMessage("The email must be between 8 and 17 characters long"),
+  check("password")
+    .isLength({ min: 20, max: 200 })
+    .withMessage("The password must be between 20 and 200 characters long"),
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ errors: errors.array() });
+    }
+    next();
+  },
+];
+
 /**
  * import { body } from 'express-validator';
 

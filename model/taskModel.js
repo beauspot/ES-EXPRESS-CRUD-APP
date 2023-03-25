@@ -6,7 +6,7 @@ const nigeriaOffset = 60 * 60 * 1000 * 1;
 const TaskSchema = new mongoose.Schema(
   {
     // creating an association between the auth Model and the task Model
-    user_id: {
+    author: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
       ref: "AuthModel",

@@ -7,20 +7,18 @@ dotenv.config();
 
 const userSchema = new mongoose.Schema(
   {
-    // creating an association with the userAuthSchema
-    user_id: {
+    /* // creating an association with the userAuthSchema
+   user_id: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
       ref: "TaskModel", // reference to the model TaskModel
-    },
+    }, */
     email: {
       type: String,
       required: [true, "Please an email address is mandatory."],
       unique: [true, "This email address is currently in use"],
       lowercase: true,
       trim: true,
-      maxlength: 100,
-      minlength: 18,
     },
     username: {
       type: String,
