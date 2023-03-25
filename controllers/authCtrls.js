@@ -7,7 +7,6 @@ import sgMail from "@sendgrid/mail";
 
 dotenv.config();
 
-
 const createUser = async (req, res, next) => {
   const { email, password, username } = req.body;
   const existingUser = await authModel.findOne({ email });
@@ -20,13 +19,7 @@ const createUser = async (req, res, next) => {
   await newUser.save();
 
   // send a welcome email to the user
-  const msg = {
-    to: req.body.email,
-    from: "beauspot@outlook.com",
-    subject: "Welcome to the Task Manager Api community!",
-    text: "Thank you for signing up for our service. As a new member of the Octave community, we invite you to become a full-fledged Task manager community and enjoy all the benefits of our service.",
-  };
-  await sgMail.send(msg);
+
   res.status(StatusCodes.CREATED).json({
     message: `The User with the username ${username}, and email ${email} has been registered Successfully`,
   });

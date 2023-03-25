@@ -27,7 +27,6 @@ export const validateRegistration = [
   check("email")
     .trim()
     .isEmail()
-    .isLength({ max: 100 })
     .withMessage("Provide an email address that could be 100 characters long")
     .custom(async (value) => {
       const userEmail = await authModel.findOne({ email: value });
@@ -51,7 +50,7 @@ export const validateRegistration = [
       }
     }),
   check("password")
-    .isLength({ min: 20, max: 200 })
+    .isLength({ min: 8, max: 20 })
     .withMessage("The password must be between 20 and 200 characters long"),
   (req, res, next) => {
     const errors = validationResult(req);
