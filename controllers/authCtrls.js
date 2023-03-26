@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
 import sgMail from "@sendgrid/mail";
+import { mailer } from "../config/nodeMailer.js";
 
 dotenv.config();
 
@@ -19,6 +20,11 @@ const createUser = async (req, res, next) => {
   await newUser.save();
 
   // send a welcome email to the user
+  const mail = email;
+  const Subject = "Welcome to Task API";
+  const text = "This is task API try it to keep ahead of your tasks";
+
+  mailer(mail, Subject, text);
 
   res.status(StatusCodes.CREATED).json({
     message: `The User with the username ${username}, and email ${email} has been registered Successfully`,
