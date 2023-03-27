@@ -53,9 +53,8 @@ const loginUser = async (req, res, next) => {
   });
 
   res
-    .cookie("refreshToken", process.env.REFRESH_TOKEN, {
+    .cookie("token", token, {
       httpOnly: true,
-      path: "/api/v1/auth/loginacct",
       expiresIn: 7 * 24 * 60 * 60 * 1000, // Set the expiration time to one week
     })
     .json({ JWT_TOKEN: token });

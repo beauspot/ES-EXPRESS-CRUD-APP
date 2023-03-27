@@ -8,7 +8,7 @@ const TaskSchema = new mongoose.Schema(
     // creating an association between the auth Model and the task Model
     author: {
       type: mongoose.Schema.Types.ObjectId,
-      required: true,
+      required: false,
       ref: "AuthModel",
     },
     taskname: {
