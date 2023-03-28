@@ -10,6 +10,7 @@ import mongoSanitize from "express-mongo-sanitize";
 import { StatusCodes } from "http-status-codes";
 import cookieParser from "cookie-parser";
 import dotenv from "dotenv";
+import logger from "morgan";
 
 // module dependencies
 import connectDB from "./db/dbconfig.js";
@@ -28,6 +29,7 @@ const app = express();
 app.use(xss());
 app.use(cors());
 app.use(helmet());
+app.use(logger("dev"));
 app.use(express.json());
 app.use(mongoSanitize());
 app.use(cookieParser());
