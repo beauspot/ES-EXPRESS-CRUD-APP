@@ -5,15 +5,16 @@ import morgan from "morgan";
 import cors from "cors";
 import helmet from "helmet";
 import xss from "xss-clean";
-import sessions from "express-session";
 import mongoSanitize from "express-mongo-sanitize";
 import { StatusCodes } from "http-status-codes";
+import MongodbSession from "connect-mongodb-session";
 import cookieParser from "cookie-parser";
+import session from "express-session";
 import dotenv from "dotenv";
 import logger from "morgan";
 
 // module dependencies
-import connectDB from "./db/dbconfig.js";
+import connectDB from "./config/dbconfig.js";
 import taskRoute from "./routes/taskRoutes.js";
 import authRoute from "./routes/authRoute.js";
 
@@ -24,6 +25,12 @@ import errorHandlerMiddleware from "./middlewares/errorHandler.js";
 dotenv.config();
 
 const app = express();
+const MongoDBStore = MongodbSession(session);
+const store = new MongoDBStore({
+  uri: process.env.MONGO_URL,
+  collection: "Sessions-Collection",
+  ttl: 60 * 60, // session will expire in 1hr
+});
 
 // Middleware functions
 app.use(xss());
@@ -33,17 +40,22 @@ app.use(logger("dev"));
 app.use(express.json());
 app.use(mongoSanitize());
 app.use(cookieParser());
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 if (process.env.NODE_ENV !== "production") {
   app.use(morgan("dev"));
 }
 app.use(
-  sessions({
-    resave: true,
-    saveUninitialized: true,
-    secret: true,
-    cookie: { maxAge: 60000 },
+  session({
     secret: process.env.SESSION_SECRET_KEY,
+    resave: false,
+    saveUninitialized: false,
+    store: store,
+    cookie: {
+      sameSite: "strict",
+      secure: false, // use true if using https
+      maxAge: 1000 * 60 * 60, // cookie would expire in 1 hour
+    },
   })
 );
 
@@ -52,6 +64,9 @@ app.use("/api/v1/tasks", taskRoute);
 app.use("/api/v1/auth", authRoute);
 
 app.get("/", (req, res, next) => {
+  req.session.isAuth = true;
+  console.log(req.session);
+  console.log(req.session.id);
   res
     .status(StatusCodes.PERMANENT_REDIRECT)
     .redirect("/api/v1/auth/createacct");

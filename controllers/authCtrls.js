@@ -1,23 +1,33 @@
 import authModel from "../model/authModel.js";
 import { StatusCodes } from "http-status-codes";
-import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import dotenv from "dotenv";
-import sgMail from "@sendgrid/mail";
 import { mailer } from "../config/nodeMailer.js";
 
 dotenv.config();
 
-const createUser = async (req, res, next) => {
-  const { email, password, username } = req.body;
-  const existingUser = await authModel.findOne({ email });
-  if (existingUser) {
-    return res.status(400).json({ message: "User already exists" });
+export const createUser = async (req, res, next) => {
+  const { email, username, password } = req.body;
+  if (!email || !username || !password) {
+    return res.status(400).send("All fields are mandatory ");
   }
+
+  // check if the user already exists
+  const existingUser = await authModel.findOne({ username });
+  if (existingUser) {
+    return res
+      .status(StatusCodes.CONFLICT)
+      .json({ errorMessage: "Username is already taken" });
+  }
+  // hash the password.
   const hashedPassword = await bcrypt.hash(password, 10);
-  const newUser = new authModel({ email, username, password: hashedPassword });
+  const newUser = new authModel({
+    email,
+    username,
+    password: hashedPassword,
+  });
   console.log(newUser);
-  await newUser.save();
+  await newUser.save(); // save user to database
 
   // send a welcome email to the user
   const mail = email;
@@ -26,54 +36,59 @@ const createUser = async (req, res, next) => {
 
   mailer(mail, Subject, text);
 
-  res.status(StatusCodes.CREATED).json({
-    message: `The User with the username ${username}, and email ${email} has been registered Successfully`,
-  });
+  res
+    .status(StatusCodes.CREATED)
+    .cookie("sessionId", sessionId)
+    .json({
+      message: `The User with the username ${username}, and email ${email} has been registered Successfully`,
+    });
 };
 
-const loginUser = async (req, res, next) => {
+export const loginUser = async (req, res, next) => {
   const { username, password } = req.body;
-  const existingUser = await authModel.findOne({ username });
 
-  // checks if the user exists
-  if (!existingUser) {
-    res.status(StatusCodes.UNAUTHORIZED).json({
-      message: `The User with the username ${username} does not exist.`,
+  const userExists = await authModel.findOne({ username: username });
+
+  if (!userExists) {
+    return res.status(StatusCodes.UNAUTHORIZED).json({
+      errMessage: `The user with the username: ${username} is not registered`,
     });
   }
-  const isPasswordMatch = await bcrypt.compare(password, existingUser.password);
-  if (!isPasswordMatch) {
-    res
+
+  const isMatch = await bcrypt.compare(password, userExists.password);
+
+  if (!isMatch) {
+    return res
       .status(StatusCodes.UNAUTHORIZED)
-      .json({ message: `Invalid username or Password` });
-    return;
+      .json({ errMessage: `The user with the username: ${username}` });
   }
-  const token = jwt.sign({ userId: existingUser._id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXP,
-  });
-
-  res
-    .cookie("token", token, {
-      httpOnly: true,
-      expiresIn: 7 * 24 * 60 * 60 * 1000, // Set the expiration time to one week
-    })
-    .json({ JWT_TOKEN: token });
-};
-
-const logoutUser = async (req, res, next) => {
-  const { username } = req.body;
-  res.clearCookie("refreshToken", { path: "/api/v1/auth/logoutacct" });
+  req.session.isAuth = true;
   res
     .status(StatusCodes.OK)
-    .json({ message: `The user ${username} is logged out successfully.` });
+    .json({ message: `The user with the username: ${username} is logged in` });
 };
 
-const logoffUser = async (req, res, next) => {
-  const { username } = req.body;
-  await authModel.findOneAndDelete(username);
-  res.status(StatusCodes.ACCEPTED).json({
-    message: `The User ${username} has successfully deleted his or her account`,
+export const logoutUser = async (req, res, next) => {
+  await req.session.destroy((err) => {
+    if (err) {
+      return res.status(403).json({ errorMesage: err.message });
+    }
+    res
+      .status(StatusCodes.OK)
+      .clearCookie("sessionId")
+      .json({ message: "Logout successful" });
   });
 };
 
-export { createUser, logoutUser, logoffUser, loginUser };
+export const logoffUser = async (req, res, next) => {
+  const { username } = req.body;
+  await authModel.findByIdAndDelete(username);
+  res.sendStatus(204);
+};
+
+/** createUser,
+  loginUser,
+  logoutUser,
+  logoffUser, */
+
+// export const createUser =
