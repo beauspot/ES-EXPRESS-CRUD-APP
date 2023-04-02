@@ -36,18 +36,21 @@ export const createUser = async (req, res, next) => {
 
   mailer(mail, Subject, text);
 
-  res
-    .status(StatusCodes.CREATED)
-    .cookie("sessionId", sessionId)
-    .json({
-      message: `The User with the username ${username}, and email ${email} has been registered Successfully`,
-    });
+  return res.status(StatusCodes.CREATED).json({
+    message: `The User with the username ${username}, and email ${email} has been registered Successfully`,
+  });
 };
 
 export const loginUser = async (req, res, next) => {
   const { username, password } = req.body;
 
-  const userExists = await authModel.findOne({ username: username });
+  if (!username || !password) {
+    res
+      .status(StatusCodes.BAD_REQUEST)
+      .json({ errMessage: `All Fields Are Mandatory` });
+  }
+
+  const userExists = await authModel.findOne({ username });
 
   if (!userExists) {
     return res.status(StatusCodes.UNAUTHORIZED).json({
@@ -58,14 +61,15 @@ export const loginUser = async (req, res, next) => {
   const isMatch = await bcrypt.compare(password, userExists.password);
 
   if (!isMatch) {
-    return res
-      .status(StatusCodes.UNAUTHORIZED)
-      .json({ errMessage: `The user with the username: ${username}` });
+    return res.status(StatusCodes.UNAUTHORIZED).json({
+      errMessage: `Authentication Error for username: ${username}`,
+    });
+  } else {
+    req.session.isAuth = true;
+    return res.status(StatusCodes.OK).json({
+      message: `The user with the username: ${username} is logged in`,
+    });
   }
-  req.session.isAuth = true;
-  res
-    .status(StatusCodes.OK)
-    .json({ message: `The user with the username: ${username} is logged in` });
 };
 
 export const logoutUser = async (req, res, next) => {

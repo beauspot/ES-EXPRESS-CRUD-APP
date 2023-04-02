@@ -1,6 +1,6 @@
 import { check, validationResult } from "express-validator";
 import { StatusCodes } from "http-status-codes";
-// import authModel from "../model/authModel.js";
+import authModel from "../model/authModel.js";
 
 // note the validation is running against the mongo db schema.
 export const validateTask = [
