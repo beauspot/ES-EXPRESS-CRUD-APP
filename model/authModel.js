@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import bcrypt from "bcrypt";
+// import bcrypt from "bcrypt";
 
 const userSchema = new mongoose.Schema({
   email: {
@@ -26,12 +26,12 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-userSchema.pre("save", async function () {
+/* userSchema.pre("save", async function () {
   const user = this;
   if (user.isModified("password")) {
     user.password = await bcrypt.hash(user.password, 10);
   }
 });
-
+ */
 const authModel = mongoose.model("authmodels", userSchema);
 export default authModel;
