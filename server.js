@@ -47,8 +47,8 @@ if (process.env.NODE_ENV !== "production") {
 }
 app.use(
   session({
-    secret: process.env.SESSION_SECRET_KEY,
     resave: false,
+    secret: process.env.SESSION_SECRET_KEY,
     saveUninitialized: false,
     store: store,
     cookie: {
