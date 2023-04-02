@@ -9,7 +9,7 @@ const TaskSchema = new mongoose.Schema(
     author: {
       type: mongoose.Schema.Types.ObjectId,
       required: false,
-      ref: "AuthModel",
+      ref: "authModels",
     },
     taskname: {
       type: String,
