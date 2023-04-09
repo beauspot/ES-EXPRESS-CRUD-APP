@@ -17,7 +17,6 @@ import logger from "morgan";
 import connectDB from "./config/dbconfig.js";
 import taskRoute from "./routes/taskRoutes.js";
 import authRoute from "./routes/authRoute.js";
-
 // middlewares
 import __404_err_page from "./middlewares/notfound.js";
 import errorHandlerMiddleware from "./middlewares/errorHandler.js";
@@ -31,7 +30,6 @@ const store = new MongoDBStore({
   collection: "Sessions-Collection",
   ttl: 60 * 60, // session will expire in 1hr
 });
-
 // Middleware functions
 app.use(xss());
 app.use(cors());
@@ -41,6 +39,7 @@ app.use(express.json());
 app.use(mongoSanitize());
 app.use(cookieParser());
 app.use(express.json());
+
 app.use(express.urlencoded({ extended: true }));
 if (process.env.NODE_ENV !== "production") {
   app.use(morgan("dev"));
@@ -85,6 +84,7 @@ const startServer = async () => {
     );
   } catch (err) {
     console.error(err.message);
+    process.exit(1);
   }
 };
 

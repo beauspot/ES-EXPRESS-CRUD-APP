@@ -165,3 +165,41 @@ const getTasks = async (req, res) => {
 
 module.exports = { getTasks };
  */
+
+// ref: Octave; Redis configuration
+/* class RedisClient {
+  constructor() {
+    this.redis = null;
+  }
+
+  async connectRedis(url) {
+    const client = createClient({ url: url });
+    client.on("error", (err) => console.log("Redis, client error:", err));
+    try {
+      await client.connect();
+      this.client = client;
+      console.info("Redis connection established successfully");
+      return client;
+    } catch (error) {
+      console.error(error.message);
+    }
+  }
+
+  async get(key) {
+    const value = await this.client.get(key);
+    return value;
+  }
+
+  async set(key, value, duration) {
+    await this.client.set(key, value);
+    await this.client.expire(key, duration);
+  }
+
+  async del(key) {
+    await this.client.del(key);
+  }
+}
+
+const redisClient = new RedisClient();
+export default redisClient;
+ */

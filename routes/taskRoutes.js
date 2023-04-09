@@ -8,10 +8,12 @@ import {
 import express from "express";
 import { validateTask } from "../middlewares/validate.js";
 import { authenticateMiddleware } from "../middlewares/authMiddleware.js";
+import { cache } from "../middlewares/redisMiddleware.js";
 
 const router = express.Router();
 
 router.use(authenticateMiddleware);
+router.use(cache);
 
 router.get("/getalltasks", getAllTasks);
 
