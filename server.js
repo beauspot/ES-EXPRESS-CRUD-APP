@@ -13,10 +13,14 @@ import session from "express-session";
 import dotenv from "dotenv";
 import logger from "morgan";
 
+// Your code here
+
 // module dependencies
 import connectDB from "./config/dbconfig.js";
 import taskRoute from "./routes/taskRoutes.js";
 import authRoute from "./routes/authRoute.js";
+// import swaggerUisetup from "./config/swaggerUIconf.js";
+
 // middlewares
 import __404_err_page from "./middlewares/notfound.js";
 import errorHandlerMiddleware from "./middlewares/errorHandler.js";
@@ -61,6 +65,7 @@ app.use(
 // routes middlewares
 app.use("/api/v1/tasks", taskRoute);
 app.use("/api/v1/auth", authRoute);
+//app.use("/api/v1/docs", ...swaggerUisetup());
 
 app.get("/", (req, res, next) => {
   req.session.isAuth = true;
