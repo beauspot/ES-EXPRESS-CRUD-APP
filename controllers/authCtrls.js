@@ -7,68 +7,51 @@ import { mailer } from "../config/nodeMailer.js";
 dotenv.config();
 
 export const createUser = async (req, res, next) => {
-  const { email, username, password } = req.body;
-  if (!email || !username || !password) {
-    return res.status(400).send("All fields are mandatory ");
-  }
-
-  // check if the user already exists
-  const existingUser = await authModel.findOne({ username });
-  if (existingUser) {
-    return res
-      .status(StatusCodes.CONFLICT)
-      .json({ errorMessage: "Username is already taken" });
-  }
-  // hash the password.
-  const hashedPassword = await bcrypt.hash(password, 10);
-  const newUser = new authModel({
-    email,
-    username,
-    password: hashedPassword,
-  });
-  console.log(newUser);
-  await newUser.save(); // save user to database
+  const newUser = await authModel.create({ ...req.body });
+  const userToken = newUser.createJWT();
 
   // send a welcome email to the user
-  const mail = email;
+  const mail = newUser.email;
   const Subject = "Welcome to Task API";
   const text = "This is task API try it to keep ahead of your tasks";
 
   mailer(mail, Subject, text);
 
-  return res.status(StatusCodes.CREATED).json({
-    message: `The User with the username ${username}, and email ${email} has been registered Successfully`,
-  });
+  return res
+    .status(StatusCodes.CREATED)
+    .json({ UserData: { userName: newUser.username }, token: userToken });
 };
 
 export const loginUser = async (req, res, next) => {
-  const { username, password } = req.body;
+  const { email, password } = req.body;
 
-  if (!username || !password) {
+  if (!email || !password) {
     res
       .status(StatusCodes.BAD_REQUEST)
       .json({ errMessage: `All Fields Are Mandatory` });
   }
 
-  const userExists = await authModel.findOne({ username });
+  const userExists = await authModel.findOne({ email });
 
   if (!userExists) {
     return res.status(StatusCodes.UNAUTHORIZED).json({
-      errMessage: `The user with the username: ${username} is not registered`,
+      errMessage: `The user with the email: ${email} is not registered`,
     });
   }
 
-  const isMatch = await bcrypt.compare(password, userExists.password);
+  // comparing the user pwds
+  const isMatch = await userExists.comparePwd(password);
   console.log(isMatch);
 
   if (!isMatch) {
     return res.status(StatusCodes.UNAUTHORIZED).json({
-      errMessage: `Authentication Error for username: ${username}`,
+      errMessage: `Authentication Error for email: ${email}`,
     });
   } else {
-    req.session.isAuth = true;
+    const usertoken = userExists.createJWT();
     return res.status(StatusCodes.OK).json({
-      message: `The user with the username: ${username} is logged in`,
+      userDate: { userEmail: userExists.email },
+      Token: usertoken,
     });
   }
 };

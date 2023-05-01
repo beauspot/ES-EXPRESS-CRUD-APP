@@ -16,17 +16,18 @@ const TaskSchema = new mongoose.Schema(
       required: [true, "Please provide a task name"],
       trim: true,
       maxlength: 50,
-      minlength: 10,
     },
-
     completed: {
       type: Boolean,
       default: false,
     },
+    createdBy: {
+      type: mongoose.Types.ObjectId,
+      ref: "authModel",
+    },
   },
   {
-    timestamps: { currentTime: () => Date.now() + nigeriaOffset },
-    versionKey: false,
+    timestamps: true,
   }
 );
 

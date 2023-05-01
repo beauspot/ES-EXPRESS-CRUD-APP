@@ -1,8 +1,19 @@
+import JWT from "jsonwebtoken";
+import UnauthenticatedError from "../errors/unauthenticated.js";
+
 export const authenticateMiddleware = (req, res, next) => {
-  if (req.session.isAuth) {
+  //check header
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    throw new UnauthenticatedError("User authentication failed.");
+  }
+  const token = authHeader.split(" ")[1];
+  try {
+    const payload = JWT.verify(token, process.env.JWT_SECRET);
+    // attach the user to the job route
+    req.user = { userId: payload.userId, name: payload.name };
     next();
-  } else {
-    req.session.error = "You have to Login first";
-    res.status(401).json({ message: "You aren't authenticated" });
+  } catch (error) {
+    throw new UnauthenticatedError("Authentication Invalid");
   }
 };
