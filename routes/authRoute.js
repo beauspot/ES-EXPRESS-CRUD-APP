@@ -22,3 +22,12 @@ router.post("/logoutacct", logoutUser);
 router.delete("/logoffacct", logoffUser);
 
 export default router;
+
+
+/**
+ * {
+  "username": "beauspot",
+  "password": "#b1058019"
+}
+ * 
+ */

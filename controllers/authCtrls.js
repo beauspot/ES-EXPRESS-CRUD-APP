@@ -1,8 +1,9 @@
 import authModel from "../model/authModel.js";
 import { StatusCodes } from "http-status-codes";
-import bcrypt from "bcrypt";
+import { authenticateMiddleware } from "../middlewares/authMiddleware.js";
 import dotenv from "dotenv";
 import { mailer } from "../config/nodeMailer.js";
+import UnauthenticatedError from "../errors/unauthenticated.js";
 
 dotenv.config();
 
@@ -41,7 +42,7 @@ export const loginUser = async (req, res, next) => {
 
   // comparing the user pwds
   const isMatch = await userExists.comparePwd(password);
-  console.log(isMatch);
+  console.log(isMatch); // returns a boolean
 
   if (!isMatch) {
     return res.status(StatusCodes.UNAUTHORIZED).json({
@@ -57,15 +58,27 @@ export const loginUser = async (req, res, next) => {
 };
 
 export const logoutUser = async (req, res, next) => {
-  await req.session.destroy((err) => {
-    if (err) {
-      return res.status(403).json({ errorMesage: err.message });
-    }
-    res
-      .status(StatusCodes.OK)
-      .clearCookie("sessionId")
-      .json({ message: "Logout successful" });
-  });
+  // Use the authentication middleware to ensure that the user is authenticated
+  authenticateMiddleware(req, res, () => {});
+
+  // Retrieve the token from the Authorization header.
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    throw new UnauthenticatedError("User authentication failed.");
+  }
+
+  const token = authHeader.split(" ")[1];
+
+  // check if token exists
+  if (!req.user) {
+    throw new Error("req.user is undefined");
+  }
+
+  // Remove the token from the user's token array and save the changes
+      req.user.tokens = req.user.tokens.filter((t) => t.token !== token);
+      await req.user.save();
+
+  res.send("User logged out successfully");
 };
 
 export const logoffUser = async (req, res, next) => {

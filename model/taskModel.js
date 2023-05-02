@@ -21,9 +21,15 @@ const TaskSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    role: {
+      type: String,
+      default: "user",
+      enum: ["user", "admin"],
+      required: true,
+    },
     createdBy: {
       type: mongoose.Types.ObjectId,
-      ref: "authModel",
+      ref: "authModels",
     },
   },
   {
