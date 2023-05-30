@@ -1,9 +1,7 @@
 import authModel from "../model/authModel.js";
 import { StatusCodes } from "http-status-codes";
-import { authenticateMiddleware } from "../middlewares/authMiddleware.js";
 import dotenv from "dotenv";
 import { mailer } from "../config/nodeMailer.js";
-import UnauthenticatedError from "../errors/unauthenticated.js";
 
 dotenv.config();
 
@@ -57,39 +55,17 @@ export const loginUser = async (req, res, next) => {
   }
 };
 
-export const logoutUser = async (req, res, next) => {
-  // Use the authentication middleware to ensure that the user is authenticated
-  authenticateMiddleware(req, res, () => {});
-
-  // Retrieve the token from the Authorization header.
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    throw new UnauthenticatedError("User authentication failed.");
-  }
-
-  const token = authHeader.split(" ")[1];
-
-  // check if token exists
-  if (!req.user) {
-    throw new Error("req.user is undefined");
-  }
-
-  // Remove the token from the user's token array and save the changes
-      req.user.tokens = req.user.tokens.filter((t) => t.token !== token);
-      await req.user.save();
-
-  res.send("User logged out successfully");
+export const adminify = async (req, res, next) => {
+  if (!req.user)
+    return res.status(StatusCodes.FORBIDDEN).json({
+      success: false,
+      message: "You are not authorized to perform this action.",
+    });
+  const user = await authModel.findById(req.user.userId);
+  user.role = "Admin";
+  await user.save();
+  return res.status(StatusCodes.OK).json({
+    success: true,
+    message: "User is now Admin",
+  });
 };
-
-export const logoffUser = async (req, res, next) => {
-  const { username } = req.body;
-  await authModel.findByIdAndDelete(username);
-  res.sendStatus(204);
-};
-
-/** createUser,
-  loginUser,
-  logoutUser,
-  logoffUser, */
-
-// export const createUser =
