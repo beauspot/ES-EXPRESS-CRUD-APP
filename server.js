@@ -65,6 +65,7 @@ app.use(
 // routes middlewares
 app.use("/api/v1/tasks", taskRoute);
 app.use("/api/v1/auth", authRoute);
+
 //app.use("/api/v1/docs", ...swaggerUisetup());
 
 app.get("/", (req, res, next) => {
@@ -73,7 +74,7 @@ app.get("/", (req, res, next) => {
   console.log(req.session.id);
   res
     .status(StatusCodes.PERMANENT_REDIRECT)
-    .redirect("/api/v1/auth/createacct");
+    .json({ message: "Welcome to the task rest api application." });
 });
 
 app.use(errorHandlerMiddleware);
