@@ -6,6 +6,6 @@ class UnauthenticatedError extends CustomAPIError {
     super(message);
     this.statusCode = StatusCodes.UNAUTHORIZED;
   }
-}
+};
 
 export default UnauthenticatedError;
