@@ -1,33 +1,16 @@
-import {
-  createUser,
-  loginUser,
-  logoutUser,
-  logoffUser,
-} from "../controllers/authCtrls.js";
+import { createUser, loginUser, adminify } from "../controllers/authCtrls.js";
 import { validateRegistration } from "../middlewares/validate.js";
 
-// import { authMiddleware } from "../middlewares/authMiddleware.js";
+import { auth } from "../middlewares/authMiddleware.js";
 import express from "express";
 const router = express.Router();
 
-// router.use(authMiddleware);
-
+router.use(auth);
 
 router.post("/createacct", validateRegistration, createUser);
 
 router.post("/loginacct", loginUser);
 
-router.post("/logoutacct", logoutUser);
-
-router.delete("/logoffacct", logoffUser);
+router.post("/adminuser", adminify);
 
 export default router;
-
-
-/**
- * {
-  "username": "beauspot",
-  "password": "#b1058019"
-}
- * 
- */
